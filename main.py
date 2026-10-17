@@ -9,9 +9,6 @@ from telegram.ext import (
     ConversationHandler,
     filters,
 )
-3. Render ayarları
-Build Command: pip install -r requirements.txt
-
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
