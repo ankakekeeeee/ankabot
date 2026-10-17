@@ -1,14 +1,14 @@
-
-if not BOT_TOKEN:
-    raise RuntimeError(...)
-ve şu kontrolü:
-
-
-python
-if not ADMIN_CHAT_ID or not ADMIN_CHAT_ID.lstrip("-").isdigit():
-    raise RuntimeError(...)
-Bunları kaldırabilirsin; çünkü artık değerleri doğrudan kodda tanımlıyoruz.
-
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    ContextTypes,
+    ConversationHandler,
+    filters,
+)
 3. Render ayarları
 Build Command: pip install -r requirements.txt
 
