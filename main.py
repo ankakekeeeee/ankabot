@@ -22,7 +22,7 @@ from telegram.ext import (
 )
 
 # =============== AYARLAR ===============
-BOT_TOKEN = "8870706943:AAHlxcSyS0gH0beDIb2jTutFDwHETeDvzg8"
+BOT_TOKEN = "8870706943:AAGZF6lhv153wsahoFCYrzJgQOhMM7xFLM8"
 ADMIN_CHAT_ID = 8835514842  # Kendi Telegram kullanıcı ID'n
 
 WAITING_DEKONT = 1
