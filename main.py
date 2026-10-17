@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BOT_TOKEN = os.getenv("8870706943:AAETJvhW-Uvx0VMSgxx6SQtPHYN8_yroei0", "").strip()
+BOT_TOKEN = os.getenv("8870706943:AAFHGzWmIirFwynis6waxrRaZ49MJpFnvFs", "").strip()
 ADMIN_CHAT_ID = os.getenv("8835514842", "").strip()
 
 WAITING_DEKONT = 1
