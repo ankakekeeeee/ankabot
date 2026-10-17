@@ -1,5 +1,4 @@
-import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -16,19 +15,19 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-BOT_TOKEN = "8870706943:AAETY5GWKKWF3p5NrZPoV93dbRrCD5QLXjs"
-ADMIN_CHAT_ID = "8835514842"  # Dekontların geleceği Telegram ID'niz
+BOT_TOKEN = "8870706943:AAGxDZkEV-bfVAETv4566nBE6jUpekISNJA"
+ADMIN_CHAT_ID = "BURAYA_KENDI_TELEGRAM_IDNIZI_YAZIN"  # Dekontların geleceği Telegram ID'niz
 
 # Conversation durumları
 WAITING_DEKONT = 1
 
 # Ürün Linkleri
 VIP_KANALLAR = [
-    "https://t.me/+Aqi4UqSzr4JjZmRk",
-    "https://t.me/+H2z-xlyZ6zM0OTE0",
-    "https://t.me/+p01bQp6XeMmI0",
-    "https://t.me/+HqtuwLtoMkkwMWQ0",
-    "https://t.me/+BcHhS86B9ocyMWQ0"
+    "[https://t.me/+Aqi4UqSzr4JjZmRk](https://t.me/+Aqi4UqSzr4JjZmRk)",
+    "[https://t.me/+H2z-xlyZ6zM0OTE0](https://t.me/+H2z-xlyZ6zM0OTE0)",
+    "[https://t.me/+p01bQp6XeMmI0](https://t.me/+p01bQp6XeMmI0)",
+    "[https://t.me/+HqtuwLtoMkkwMWQ0](https://t.me/+HqtuwLtoMkkwMWQ0)",
+    "[https://t.me/+BcHhS86B9ocyMWQ0](https://t.me/+BcHhS86B9ocyMWQ0)"
 ]
 
 # Ana Menü Oluşturucu
@@ -38,11 +37,11 @@ def build_main_keyboard():
             InlineKeyboardButton("🔞 Türk +18 VIP Paket (350 TL)", callback_data="buy_turk_18")
         ],
         [
-            InlineKeyboardButton("📲 SMS Onay Paneline Giriş", url="https://sonpanelanka.onrender.com/")
+            InlineKeyboardButton("📲 SMS Onay Paneline Giriş", url="[https://sonpanelanka.onrender.com/](https://sonpanelanka.onrender.com/)")
         ],
         [
-            InlineKeyboardButton("🛡️ ANKA GÜVENCE KANALI", url="https://t.me/ankaguvence"),
-            InlineKeyboardButton("💬 Canlı Destek / Admin", url="https://t.me/vipankaa")
+            InlineKeyboardButton("🛡️ ANKA GÜVENCE KANALI", url="[https://t.me/ankaguvence](https://t.me/ankaguvence)"),
+            InlineKeyboardButton("💬 Canlı Destek / Admin", url="[https://t.me/vipankaa](https://t.me/vipankaa)")
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -79,7 +78,7 @@ async def buy_turk_18_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         "1️⃣ Yukarıda verilen IBAN adresine **350 TL** transferini gerçekleştirin.\n"
         "2️⃣ Ödemeyi tamamladıktan sonra dekontunuzun (ekran görüntüsü veya PDF) çıktısını alın.\n"
         "3️⃣ Aşağıdaki **'📄 Dekont Gönder'** butonuna basarak dekontunuzu bota yükleyin.\n"
-        "4️⃣ Sistem yöneticilerimiz dekontunuzu kontrol ettikten hemen sonraVIP linkleriniz otomatik olarak tarafınıza iletilecektir.\n\n"
+        "4️⃣ Sistem yöneticilerimiz dekontunuzu kontrol ettikten hemen sonra VIP linkleriniz otomatik olarak tarafınıza iletilecektir.\n\n"
         "⚡ *Herhangi bir sorunuz olursa menüdeki Canlı Destek butonundan bize ulaşabilirsiniz.*"
     )
 
@@ -106,14 +105,12 @@ async def prompt_dekont(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def receive_dekont(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     
-    # Kullanıcıya bilgi ver
     await update.message.reply_text(
         "⏳ **Dekontunuz başarıyla alındı!**\n\n"
         "Ödemeniz yetkililerimiz tarafından kontrol ediliyor. Onaylandığı anda linkleriniz buradan gönderilecektir.",
         parse_mode="Markdown"
     )
 
-    # Admin'e İlet
     admin_keyboard = InlineKeyboardMarkup([
         [
             InlineKeyboardButton("✅ Onayla ve Linkleri Gönder", callback_data=f"approve_{user.id}"),
@@ -145,7 +142,6 @@ async def handle_admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE
     user_id = int(user_id)
 
     if action == "approve":
-        # Kullanıcıya Kanalları Gönder
         links_formatted = "\n".join([f"🔗 [VIP Kanal {i+1}]({link})" for i, link in enumerate(VIP_KANALLAR)])
         success_text = (
             "🎉 **ÖDEMENİZ ONAYLANDI!** 🎉\n\n"
@@ -156,7 +152,7 @@ async def handle_admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         
         await context.bot.send_message(chat_id=user_id, text=success_text, parse_mode="Markdown", disable_web_page_preview=True)
-        await query.edit_message_caption(caption=query.message.caption + "\n\n✅ **ÖDEMA ONAYLANDI VE LİNKLER İLETİLDİ.**")
+        await query.edit_message_caption(caption=query.message.caption + "\n\n✅ **ÖDEME ONAYLANDI VE LİNKLER İLETİLDİ.**")
 
     elif action == "reject":
         reject_text = (
@@ -164,7 +160,7 @@ async def handle_admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE
             "Gönderdiğiniz dekont doğrulanamadı. Bir hata olduğunu düşünüyorsanız lütfen @vipankaa adresi üzerinden iletişime geçin."
         )
         await context.bot.send_message(chat_id=user_id, text=reject_text, parse_mode="Markdown")
-        await query.edit_message_caption(caption=query.message.caption + "\n\n❌ **ÖDEMA REDDEDİLDİ.**")
+        await query.edit_message_caption(caption=query.message.caption + "\n\n❌ **ÖDEME REDDEDİLDİ.**")
 
 # İşlem İptali
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -187,7 +183,6 @@ async def go_main_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # Conversation Handler (Dekont Akışı)
     dekont_handler = ConversationHandler(
         entry_points=[CallbackQueryHandler(prompt_dekont, pattern="^send_dekont$")],
         states={
@@ -196,7 +191,6 @@ def main():
         fallbacks=[CommandHandler("cancel", cancel)]
     )
 
-    # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(buy_turk_18_callback, pattern="^buy_turk_18$"))
     app.add_handler(CallbackQueryHandler(go_main_callback, pattern="^go_main$"))
@@ -208,3 +202,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+</ElicitationsGroup>
