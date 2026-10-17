@@ -1,11 +1,19 @@
-import logging
-import os
 
-from telegram import (
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+if not BOT_TOKEN:
+    raise RuntimeError(...)
+ve şu kontrolü:
+
+
+python
+if not ADMIN_CHAT_ID or not ADMIN_CHAT_ID.lstrip("-").isdigit():
+    raise RuntimeError(...)
+Bunları kaldırabilirsin; çünkü artık değerleri doğrudan kodda tanımlıyoruz.
+
+3. Render ayarları
+Build Command: pip install -r requirements.txt
+
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -16,16 +24,9 @@ from telegram.ext import (
     filters,
 )
 
-# -------------------- AYARLAR --------------------
-
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
-logger = logging.getLogger(__name__)
-
-BOT_TOKEN = os.getenv("8870706943:AAFHGzWmIirFwynis6waxrRaZ49MJpFnvFs", "").strip()
-ADMIN_CHAT_ID = os.getenv("8835514842", "").strip()
+# =============== AYARLAR ===============
+BOT_TOKEN = "8870706943:AAHlxcSyS0gH0beDIb2jTutFDwHETeDvzg8"
+ADMIN_CHAT_ID = 8835514842  # Kendi Telegram kullanıcı ID'n
 
 WAITING_DEKONT = 1
 
@@ -37,22 +38,24 @@ VIP_KANALLAR = [
     "https://t.me/+BcHhS86B9ocyMWQ0",
 ]
 
-# -------------------- MENÜLER --------------------
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
 
+
+# =============== MENÜ ===============
 def build_main_keyboard():
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                "🔞 Türk +18 VIP Paket (350 TL)",
-                callback_data="buy_turk_18",
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                "📲 SMS Onay Paneline Giriş",
-                url="https://sonpanelanka.onrender.com/",
-            )
-        ],
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(
+            "🔞 Türk +18 VIP Paket (350 TL)",
+            callback_data="buy_turk_18",
+        )],
+        [InlineKeyboardButton(
+            "📲 SMS Onay Paneline Giriş",
+            url="https://sonpanelanka.onrender.com/",
+        )],
         [
             InlineKeyboardButton(
                 "🛡️ ANKA GÜVENCE KANALI",
@@ -63,8 +66,7 @@ def build_main_keyboard():
                 url="https://t.me/vipankaa",
             ),
         ],
-    ]
-    return InlineKeyboardMarkup(keyboard)
+    ])
 
 
 def payment_keyboard():
@@ -95,97 +97,69 @@ def admin_keyboard(user_id):
     ])
 
 
-# -------------------- BAŞLANGIÇ --------------------
-
-async def start(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
+# =============== START ===============
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "🌟 *ANKA VIP BOT'A HOŞ GELDİNİZ* 🌟\n\n"
         "Aşağıdaki menüden istediğiniz işlemi seçebilirsiniz.\n\n"
         "👇 *Lütfen bir seçenek belirleyin:*"
     )
-
-    if update.message:
-        await update.message.reply_text(
-            text,
-            parse_mode="Markdown",
-            reply_markup=build_main_keyboard(),
-        )
-    elif update.callback_query:
-        await update.callback_query.answer()
-        await update.callback_query.message.reply_text(
-            text,
-            parse_mode="Markdown",
-            reply_markup=build_main_keyboard(),
-        )
+    await update.effective_message.reply_text(
+        text,
+        parse_mode="Markdown",
+        reply_markup=build_main_keyboard(),
+    )
 
 
-# -------------------- SATIN ALMA --------------------
-
+# =============== SATIN ALMA ===============
 async def buy_turk_18_callback(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     query = update.callback_query
     await query.answer()
 
-    details_text = (
-        "🔥 *TÜRK +18 VIP PAKETİ SATIN ALMA* 🔥\n\n"
-        "📦 *Paket içeriği:* 5 özel VIP Telegram kanalı\n"
-        "💰 *Fiyat:* 350 TL\n\n"
+    text = (
+        "🔥 *TÜRK +18 VIP PAKETİ* 🔥\n\n"
+        "📦 Paket içeriği: 5 özel VIP Telegram kanalı\n"
+        "💰 Fiyat: 350 TL (tek seferlik)\n\n"
         "━━━━━━━━━━━━━━━━━━\n"
         "💳 *BANKA ÖDEME BİLGİLERİ*\n\n"
-        "🔹 *IBAN:* `TR62 0006 2000 5000 0006 8107 73`\n"
-        "🔹 *Alıcı:* Resul Sakal\n"
+        "🔹 IBAN: `TR62 0006 2000 5000 0006 8107 73`\n"
+        "🔹 Alıcı: Resul Sakal\n"
         "━━━━━━━━━━━━━━━━━━\n\n"
-        "*NASIL SATIN ALINIR?*\n"
         "1. Belirtilen hesaba 350 TL gönderin.\n"
-        "2. Ödeme dekontunuzu hazırlayın.\n"
+        "2. Dekontunuzu hazırlayın.\n"
         "3. Aşağıdaki Dekont Gönder butonuna basın.\n"
         "4. Yönetici ödemenizi kontrol edecektir.\n\n"
-        "⚠️ Ödeme doğrulanmadan VIP bağlantıları gönderilmez."
+        "⚠️ Ödeme onaylanmadan VIP bağlantıları gönderilmez."
     )
 
     await query.edit_message_text(
-        details_text,
+        text,
         parse_mode="Markdown",
         reply_markup=payment_keyboard(),
     )
 
 
-# -------------------- DEKONT İŞLEMLERİ --------------------
-
+# =============== DEKONT İSTEME ===============
 async def prompt_dekont(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     query = update.callback_query
     await query.answer()
-
     await query.message.reply_text(
-        "📄 Lütfen ödeme dekontunuzu fotoğraf veya PDF "
-        "dosyası olarak gönderin.\n\n"
-        "İşlemi iptal etmek için /cancel yazabilirsiniz."
+        "📄 Dekontunuzu fotoğraf veya PDF olarak gönderin.\n"
+        "İptal etmek için /cancel yazın."
     )
-
     return WAITING_DEKONT
 
 
+# =============== DEKONT ALMA ===============
 async def receive_dekont(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
-    if not ADMIN_CHAT_ID:
-        await update.message.reply_text(
-            "⚠️ Yönetici ayarları henüz yapılandırılmamış. "
-            "Lütfen daha sonra tekrar deneyin."
-        )
-        return ConversationHandler.END
-
+    message = update.effective_message
     user = update.effective_user
-    message = update.message
 
     if not message.photo and not (
         message.document
@@ -196,201 +170,148 @@ async def receive_dekont(
         )
         return WAITING_DEKONT
 
-    context.user_data["pending_payment"] = True
-
     caption = (
-        "🧾 *YENİ ÖDEME DEKONTU*\n\n"
-        f"👤 Kullanıcı: {user.full_name}\n"
-        f"🆔 Telegram ID: `{user.id}`\n"
-        f"🔗 Kullanıcı adı: @{user.username or 'yok'}\n\n"
-        "Ödemeyi kontrol edip aşağıdan karar verin."
+        "🧾 YENİ ÖDEME DEKONTU\n\n"
+        f"Kullanıcı: {user.full_name}\n"
+        f"Telegram ID: {user.id}\n"
+        f"Kullanıcı adı: @{user.username or 'yok'}\n\n"
+        "Ödemeyi kontrol edip karar verin."
     )
 
     try:
         if message.photo:
             await context.bot.send_photo(
-                chat_id=int(ADMIN_CHAT_ID),
+                chat_id=ADMIN_CHAT_ID,
                 photo=message.photo[-1].file_id,
                 caption=caption,
-                parse_mode="Markdown",
                 reply_markup=admin_keyboard(user.id),
             )
         else:
             await context.bot.send_document(
-                chat_id=int(ADMIN_CHAT_ID),
+                chat_id=ADMIN_CHAT_ID,
                 document=message.document.file_id,
                 caption=caption,
-                parse_mode="Markdown",
                 reply_markup=admin_keyboard(user.id),
             )
 
         await message.reply_text(
-            "✅ Dekontunuz yöneticiye iletildi.\n"
-            "Ödeme kontrol edildikten sonra size bilgi verilecektir."
+            "✅ Dekontunuz yöneticiye iletildi. "
+            "Ödeme kontrol edildikten sonra bilgi verilecektir."
         )
 
     except Exception:
-        logger.exception("Dekont yöneticiye gönderilemedi.")
+        logger.exception("Dekont gönderilemedi")
         await message.reply_text(
-            "❌ Dekont gönderilemedi. Lütfen daha sonra tekrar deneyin."
+            "❌ Dekont gönderilemedi. Yönetici ID'sini kontrol edin."
         )
 
     return ConversationHandler.END
 
 
-async def cancel(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-    context.user_data.pop("pending_payment", None)
-    await update.message.reply_text(
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
         "İşlem iptal edildi.",
         reply_markup=build_main_keyboard(),
     )
     return ConversationHandler.END
 
 
-# -------------------- YÖNETİCİ ONAYI --------------------
-
+# =============== YÖNETİCİ KARARI ===============
 async def payment_decision(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     query = update.callback_query
-    await query.answer()
 
-    if not ADMIN_CHAT_ID:
-        await query.message.reply_text("Yönetici ayarı eksik.")
-        return
-
-    if str(query.from_user.id) != ADMIN_CHAT_ID:
+    if query.from_user.id != ADMIN_CHAT_ID:
         await query.answer(
-            "Bu işlemi yalnızca yönetici yapabilir.",
+            "Bu işlem yalnızca yöneticiye açıktır.",
             show_alert=True,
         )
         return
 
-    action, user_id_text = query.data.split(":", 1)
-    user_id = int(user_id_text)
+    await query.answer()
+    action, user_text = query.data.split(":", 1)
+    user_id = int(user_text)
 
-    if action == "approve":
-        try:
-            links_text = (
-                "🎉 *Ödemeniz onaylandı!*\n\n"
-                "VIP kanal bağlantılarınız aşağıdadır:\n\n"
+    try:
+        if action == "approve":
+            links = "\n".join(
+                f"{i}. {link}"
+                for i, link in enumerate(VIP_KANALLAR, 1)
             )
-
-            for index, link in enumerate(VIP_KANALLAR, start=1):
-                links_text += f"{index}. {link}\n"
-
             await context.bot.send_message(
                 chat_id=user_id,
-                text=links_text,
-                parse_mode="Markdown",
+                text=(
+                    "🎉 Ödemeniz onaylandı!\n\n"
+                    "VIP kanal bağlantılarınız:\n\n" + links
+                ),
                 disable_web_page_preview=True,
             )
+            result = "✅ Ödeme onaylandı."
 
-            await query.edit_message_caption(
-                caption=(
-                    (query.message.caption or "")
-                    + "\n\n✅ Ödeme onaylandı."
-                ),
-            )
-
-        except Exception:
-            logger.exception("Onay işlemi tamamlanamadı.")
-            await query.message.reply_text(
-                "Kullanıcıya mesaj gönderilemedi. "
-                "Kullanıcının botu başlattığını ve bağlantıların "
-                "geçerli olduğunu kontrol edin."
-            )
-
-    elif action == "reject":
-        try:
+        else:
             await context.bot.send_message(
                 chat_id=user_id,
                 text=(
                     "❌ Dekontunuz onaylanmadı. "
-                    "Lütfen ödemenizi ve dekontunuzu kontrol edin "
-                    "veya canlı destekle iletişime geçin."
+                    "Lütfen dekontunuzu kontrol edin veya destekle iletişime geçin."
                 ),
             )
+            result = "❌ Ödeme reddedildi."
 
+        if query.message.caption is not None:
             await query.edit_message_caption(
-                caption=(
-                    (query.message.caption or "")
-                    + "\n\n❌ Ödeme reddedildi."
-                ),
+                caption=query.message.caption + "\n\n" + result,
+                reply_markup=None,
             )
+        else:
+            await query.edit_message_text(result, reply_markup=None)
 
-        except Exception:
-            logger.exception("Ret bildirimi gönderilemedi.")
-            await query.message.reply_text(
-                "Kullanıcıya ret bildirimi gönderilemedi."
-            )
+    except Exception:
+        logger.exception("Yönetici kararı işlenemedi")
+        await query.message.reply_text(
+            "İşlem sırasında hata oluştu. Kullanıcının botu başlattığını kontrol edin."
+        )
 
 
-# -------------------- ANA MENÜ --------------------
-
-async def go_main(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
+# =============== ANA MENÜ ===============
+async def go_main(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     await query.edit_message_text(
-        "🌟 *ANKA VIP BOT ANA MENÜ* 🌟\n\n"
-        "Lütfen yapmak istediğiniz işlemi seçin.",
+        "🌟 *ANKA VIP BOT ANA MENÜ* 🌟\n\nBir seçenek seçin:",
         parse_mode="Markdown",
         reply_markup=build_main_keyboard(),
     )
 
 
 async def unknown_message(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
-    await update.message.reply_text(
-        "Lütfen menüdeki seçenekleri kullanın veya /start yazın."
+    await update.effective_message.reply_text(
+        "Lütfen menü seçeneklerini kullanın veya /start yazın."
     )
 
-
-# -------------------- HATA YÖNETİMİ --------------------
 
 async def error_handler(
-    update: object,
-    context: ContextTypes.DEFAULT_TYPE,
+    update: object, context: ContextTypes.DEFAULT_TYPE
 ):
-    logger.error(
-        "İşlenmeyen bot hatası:",
-        exc_info=context.error,
-    )
+    logger.error("Bot hatası: %s", context.error)
 
 
-# -------------------- BOTU ÇALIŞTIR --------------------
-
+# =============== BOTU BAŞLAT ===============
 def main():
-    if not BOT_TOKEN:
-        raise RuntimeError(
-            "BOT_TOKEN eksik. Render Environment Variables "
-            "bölümüne BOT_TOKEN ekleyin."
-        )
+    if BOT_TOKEN == "YENI_BOT_TOKENINI_BURAYA_YAZ" or not BOT_TOKEN:
+        raise RuntimeError("Kodun başına yeni BOT_TOKEN değerini yaz.")
 
-    if not ADMIN_CHAT_ID or not ADMIN_CHAT_ID.lstrip("-").isdigit():
-        raise RuntimeError(
-            "ADMIN_CHAT_ID eksik veya geçersiz. "
-            "Yönetici Telegram kullanıcı ID'nizi girin."
-        )
+    if not isinstance(ADMIN_CHAT_ID, int) or ADMIN_CHAT_ID == 123456789:
+        raise RuntimeError("ADMIN_CHAT_ID değerini kendi Telegram ID'n ile değiştir.")
 
-    application = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(BOT_TOKEN).build()
 
     conversation = ConversationHandler(
         entry_points=[
-            CallbackQueryHandler(
-                prompt_dekont,
-                pattern="^send_dekont$",
-            )
+            CallbackQueryHandler(prompt_dekont, pattern="^send_dekont$")
         ],
         states={
             WAITING_DEKONT: [
@@ -400,36 +321,34 @@ def main():
                 )
             ],
         },
-        fallbacks=[
-            CommandHandler("cancel", cancel),
-        ],
+        fallbacks=[CommandHandler("cancel", cancel)],
         allow_reentry=True,
     )
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(
         CallbackQueryHandler(
             buy_turk_18_callback,
             pattern="^buy_turk_18$",
         )
     )
-    application.add_handler(
+    app.add_handler(
         CallbackQueryHandler(go_main, pattern="^go_main$")
     )
-    application.add_handler(
+    app.add_handler(
         CallbackQueryHandler(
             payment_decision,
-            pattern="^(approve|reject):\\d+$",
+            pattern=r"^(approve|reject):\d+$",
         )
     )
-    application.add_handler(conversation)
-    application.add_handler(
+    app.add_handler(conversation)
+    app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, unknown_message)
     )
-    application.add_error_handler(error_handler)
+    app.add_error_handler(error_handler)
 
     logger.info("Bot başlatılıyor...")
-    application.run_polling()
+    app.run_polling()
 
 
 if __name__ == "__main__":
