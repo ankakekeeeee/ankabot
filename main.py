@@ -17,7 +17,7 @@ logging.basicConfig(
 )
 
 BOT_TOKEN = "8870706943:AAETY5GWKKWF3p5NrZPoV93dbRrCD5QLXjs"
-ADMIN_CHAT_ID = "BURAYA_KENDI_TELEGRAM_IDNIZI_YAZIN"  # Dekontların geleceği Telegram ID'niz
+ADMIN_CHAT_ID = "8835514842"  # Dekontların geleceği Telegram ID'niz
 
 # Conversation durumları
 WAITING_DEKONT = 1
