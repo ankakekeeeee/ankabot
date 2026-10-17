@@ -1,4 +1,5 @@
-import Update, InlineKeyboardButton, InlineKeyboardMarkup
+import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -23,11 +24,11 @@ WAITING_DEKONT = 1
 
 # Ürün Linkleri
 VIP_KANALLAR = [
-    "[https://t.me/+Aqi4UqSzr4JjZmRk](https://t.me/+Aqi4UqSzr4JjZmRk)",
-    "[https://t.me/+H2z-xlyZ6zM0OTE0](https://t.me/+H2z-xlyZ6zM0OTE0)",
-    "[https://t.me/+p01bQp6XeMmI0](https://t.me/+p01bQp6XeMmI0)",
-    "[https://t.me/+HqtuwLtoMkkwMWQ0](https://t.me/+HqtuwLtoMkkwMWQ0)",
-    "[https://t.me/+BcHhS86B9ocyMWQ0](https://t.me/+BcHhS86B9ocyMWQ0)"
+    "https://t.me/+Aqi4UqSzr4JjZmRk",
+    "https://t.me/+H2z-xlyZ6zM0OTE0",
+    "https://t.me/+p01bQp6XeMmI0",
+    "https://t.me/+HqtuwLtoMkkwMWQ0",
+    "https://t.me/+BcHhS86B9ocyMWQ0"
 ]
 
 # Ana Menü Oluşturucu
@@ -37,11 +38,11 @@ def build_main_keyboard():
             InlineKeyboardButton("🔞 Türk +18 VIP Paket (350 TL)", callback_data="buy_turk_18")
         ],
         [
-            InlineKeyboardButton("📲 SMS Onay Paneline Giriş", url="[https://sonpanelanka.onrender.com/](https://sonpanelanka.onrender.com/)")
+            InlineKeyboardButton("📲 SMS Onay Paneline Giriş", url="https://sonpanelanka.onrender.com/")
         ],
         [
-            InlineKeyboardButton("🛡️ ANKA GÜVENCE KANALI", url="[https://t.me/ankaguvence](https://t.me/ankaguvence)"),
-            InlineKeyboardButton("💬 Canlı Destek / Admin", url="[https://t.me/vipankaa](https://t.me/vipankaa)")
+            InlineKeyboardButton("🛡️ ANKA GÜVENCE KANALI", url="https://t.me/ankaguvence"),
+            InlineKeyboardButton("💬 Canlı Destek / Admin", url="https://t.me/vipankaa")
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -92,115 +93,4 @@ async def buy_turk_18_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 # Dekont Bekleme Durumu
 async def prompt_dekont(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
-
-    await query.edit_message_text(
-        "📸 **Lütfen ödemenize ait dekontu (fotoğraf veya belge) bu mesaja yanıt olarak gönderin.**\n\n"
-        "❌ İptal etmek için /cancel yazabilirsiniz.",
-        parse_mode="Markdown"
-    )
-    return WAITING_DEKONT
-
-# Dekontu Alıp Admin'e İletme
-async def receive_dekont(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    
-    await update.message.reply_text(
-        "⏳ **Dekontunuz başarıyla alındı!**\n\n"
-        "Ödemeniz yetkililerimiz tarafından kontrol ediliyor. Onaylandığı anda linkleriniz buradan gönderilecektir.",
-        parse_mode="Markdown"
-    )
-
-    admin_keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ Onayla ve Linkleri Gönder", callback_data=f"approve_{user.id}"),
-            InlineKeyboardButton("❌ Reddet", callback_data=f"reject_{user.id}")
-        ]
-    ])
-
-    admin_msg = (
-        f"🚨 **YENİ ÖDEME DEKONTU!**\n\n"
-        f"👤 **Kullanıcı:** {user.full_name} (@{user.username})\n"
-        f"🆔 **ID:** `{user.id}`\n"
-        f"📦 **Ürün:** Türk +18 VIP (350 TL)"
-    )
-
-    if update.message.photo:
-        await context.bot.send_photo(chat_id=ADMIN_CHAT_ID, photo=update.message.photo[-1].file_id, caption=admin_msg, parse_mode="Markdown", reply_markup=admin_keyboard)
-    elif update.message.document:
-        await context.bot.send_document(chat_id=ADMIN_CHAT_ID, document=update.message.document.file_id, caption=admin_msg, parse_mode="Markdown", reply_markup=admin_keyboard)
-    
-    return ConversationHandler.END
-
-# Admin Onay/Red İşlemleri
-async def handle_admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data
-    action, user_id = data.split("_")
-    user_id = int(user_id)
-
-    if action == "approve":
-        links_formatted = "\n".join([f"🔗 [VIP Kanal {i+1}]({link})" for i, link in enumerate(VIP_KANALLAR)])
-        success_text = (
-            "🎉 **ÖDEMENİZ ONAYLANDI!** 🎉\n\n"
-            "Satın aldığınız **Türk +18 VIP Paket** linkleriniz aşağıdadır. "
-            "Linklere tıklayarak kanallara katılabilirsiniz:\n\n"
-            f"{links_formatted}\n\n"
-            "✨ Bizi tercih ettiğiniz için teşekkür ederiz!"
-        )
-        
-        await context.bot.send_message(chat_id=user_id, text=success_text, parse_mode="Markdown", disable_web_page_preview=True)
-        await query.edit_message_caption(caption=query.message.caption + "\n\n✅ **ÖDEME ONAYLANDI VE LİNKLER İLETİLDİ.**")
-
-    elif action == "reject":
-        reject_text = (
-            "❌ **Ödemeniz Onaylanmadı!**\n\n"
-            "Gönderdiğiniz dekont doğrulanamadı. Bir hata olduğunu düşünüyorsanız lütfen @vipankaa adresi üzerinden iletişime geçin."
-        )
-        await context.bot.send_message(chat_id=user_id, text=reject_text, parse_mode="Markdown")
-        await query.edit_message_caption(caption=query.message.caption + "\n\n❌ **ÖDEME REDDEDİLDİ.**")
-
-# İşlem İptali
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("İşlem iptal edildi.", reply_markup=build_main_keyboard())
-    return ConversationHandler.END
-
-# Ana Menüye Dönüş Callback
-async def go_main_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    
-    welcome_text = (
-        "🌟 **ANKA VIP BOT'A HOŞ GELDİNİZ** 🌟\n\n"
-        "Aşağıdaki menüyü kullanarak VIP içeriklerimize erişebilir, SMS Onay Paneline katılabilir "
-        "veya güvence kanalımızı inceleyebilirsiniz.\n\n"
-        "👇 **Lütfen işlem yapmak istediğiniz seçeneğe tıklayın:**"
-    )
-    await query.edit_message_text(welcome_text, parse_mode="Markdown", reply_markup=build_main_keyboard())
-
-def main():
-    app = Application.builder().token(BOT_TOKEN).build()
-
-    dekont_handler = ConversationHandler(
-        entry_points=[CallbackQueryHandler(prompt_dekont, pattern="^send_dekont$")],
-        states={
-            WAITING_DEKONT: [MessageHandler(filters.PHOTO | filters.Document.ALL, receive_dekont)]
-        },
-        fallbacks=[CommandHandler("cancel", cancel)]
-    )
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(buy_turk_18_callback, pattern="^buy_turk_18$"))
-    app.add_handler(CallbackQueryHandler(go_main_callback, pattern="^go_main$"))
-    app.add_handler(CallbackQueryHandler(handle_admin_action, pattern="^(approve|reject)_"))
-    app.add_handler(dekont_handler)
-
-    print("Bot başlatıldı...")
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
-
-</ElicitationsGroup>
+    await query
